@@ -11,31 +11,86 @@ from mcp_justwatch.server import (
 )
 
 
-class MockMediaEntry:
-    """Mock MediaEntry object for testing."""
+class MockScoring:
+    """Mock Scoring object for testing."""
 
     def __init__(self, **kwargs):
-        self.title = kwargs.get("title", "Test Title")
-        self.node_id = kwargs.get("node_id", "tm12345")
-        self.entry_type = kwargs.get("entry_type", "MOVIE")
-        self.release_year = kwargs.get("release_year", 2020)
-        self.release_date = kwargs.get("release_date", None)
-        self.runtime_minutes = kwargs.get("runtime_minutes", None)
-        self.genres = kwargs.get("genres", [])
         self.imdb_score = kwargs.get("imdb_score", None)
+        self.imdb_votes = kwargs.get("imdb_votes", None)
+        self.tmdb_popularity = kwargs.get("tmdb_popularity", None)
         self.tmdb_score = kwargs.get("tmdb_score", None)
-        self.offers = kwargs.get("offers", [])
+        self.tomatometer = kwargs.get("tomatometer", None)
+        self.certified_fresh = kwargs.get("certified_fresh", None)
+        self.jw_rating = kwargs.get("jw_rating", None)
+
+
+class MockOfferPackage:
+    """Mock OfferPackage object for testing."""
+
+    def __init__(self, **kwargs):
+        self.id = kwargs.get("id", "cGF8Mg==")
+        self.package_id = kwargs.get("package_id", 2)
+        self.name = kwargs.get("name", "Netflix")
+        self.technical_name = kwargs.get("technical_name", "netflix")
+        self.icon = kwargs.get("icon", "https://example.com/icon.png")
 
 
 class MockOffer:
     """Mock Offer object for testing."""
 
     def __init__(self, **kwargs):
-        self.name = kwargs.get("name", "Netflix")
+        self.id = kwargs.get("id", "offer_id")
         self.monetization_type = kwargs.get("monetization_type", "FLATRATE")
         self.presentation_type = kwargs.get("presentation_type", "HD")
         self.price_string = kwargs.get("price_string", None)
+        self.price_value = kwargs.get("price_value", None)
+        self.price_currency = kwargs.get("price_currency", "USD")
         self.url = kwargs.get("url", "https://example.com")
+        # Handle package - accept either MockOfferPackage or dict
+        package = kwargs.get("package", None)
+        if package is None:
+            self.package = MockOfferPackage(name=kwargs.get("name", "Netflix"))
+        elif isinstance(package, dict):
+            self.package = MockOfferPackage(**package)
+        else:
+            self.package = package
+        self.subtitle_languages = kwargs.get("subtitle_languages", [])
+        self.video_technology = kwargs.get("video_technology", [])
+        self.audio_technology = kwargs.get("audio_technology", [])
+        self.audio_languages = kwargs.get("audio_languages", [])
+
+
+class MockMediaEntry:
+    """Mock MediaEntry object for testing."""
+
+    def __init__(self, **kwargs):
+        self.title = kwargs.get("title", "Test Title")
+        self.entry_id = kwargs.get("entry_id", "tm12345")
+        self.object_id = kwargs.get("object_id", 12345)
+        self.object_type = kwargs.get("object_type", "MOVIE")
+        self.url = kwargs.get("url", "https://justwatch.com/us/movie/test")
+        self.release_year = kwargs.get("release_year", 2020)
+        self.release_date = kwargs.get("release_date", None)
+        self.runtime_minutes = kwargs.get("runtime_minutes", None)
+        self.short_description = kwargs.get("short_description", None)
+        self.genres = kwargs.get("genres", [])
+        self.imdb_id = kwargs.get("imdb_id", None)
+        self.tmdb_id = kwargs.get("tmdb_id", None)
+        self.poster = kwargs.get("poster", None)
+        self.backdrops = kwargs.get("backdrops", [])
+        self.age_certification = kwargs.get("age_certification", None)
+        # Handle scoring - accept either MockScoring or dict
+        scoring = kwargs.get("scoring", None)
+        if scoring is None and (kwargs.get("imdb_score") or kwargs.get("tmdb_score")):
+            self.scoring = MockScoring(
+                imdb_score=kwargs.get("imdb_score"),
+                tmdb_score=kwargs.get("tmdb_score")
+            )
+        elif isinstance(scoring, dict):
+            self.scoring = MockScoring(**scoring)
+        else:
+            self.scoring = scoring
+        self.offers = kwargs.get("offers", [])
 
 
 class TestFormatMediaEntry:
@@ -44,7 +99,7 @@ class TestFormatMediaEntry:
     def test_format_basic_entry(self):
         """Test formatting a basic media entry."""
         entry = MockMediaEntry(
-            title="The Matrix", node_id="tm123", entry_type="MOVIE", release_year=1999
+            title="The Matrix", entry_id="tm123", object_type="MOVIE", release_year=1999
         )
 
         result = format_media_entry(entry)
@@ -90,7 +145,9 @@ class TestFormatMediaEntry:
 
     def test_format_entry_with_scores(self):
         """Test formatting entry with IMDb and TMDb scores."""
-        entry = MockMediaEntry(imdb_score=8.7, tmdb_score=8.5)
+        entry = MockMediaEntry(
+            scoring=MockScoring(imdb_score=8.7, tmdb_score=8.5)
+        )
 
         result = format_media_entry(entry)
 
@@ -100,8 +157,8 @@ class TestFormatMediaEntry:
     def test_format_entry_with_offers(self):
         """Test formatting entry with streaming offers."""
         offers = [
-            MockOffer(name="Netflix", monetization_type="FLATRATE"),
-            MockOffer(name="Amazon", monetization_type="RENT", price_string="$3.99"),
+            MockOffer(package=MockOfferPackage(name="Netflix"), monetization_type="FLATRATE"),
+            MockOffer(package=MockOfferPackage(name="Amazon"), monetization_type="RENT", price_string="$3.99"),
         ]
         entry = MockMediaEntry(offers=offers)
 
@@ -128,12 +185,13 @@ class TestSearchContent:
         """Test successful content search."""
         mock_entry = MockMediaEntry(
             title="The Matrix",
-            node_id="tm123",
-            entry_type="MOVIE",
+            entry_id="tm10",
+            object_id=10,
+            object_type="MOVIE",
             release_year=1999,
             genres=["Action", "Sci-Fi"],
-            imdb_score=8.7,
-            offers=[MockOffer(name="Netflix")],
+            scoring=MockScoring(imdb_score=8.7),
+            offers=[MockOffer(package=MockOfferPackage(name="Netflix"))],
         )
 
         with patch("mcp_justwatch.server.justwatch.search", return_value=[mock_entry]):
@@ -220,11 +278,11 @@ class TestGetDetails:
         """Test successful details retrieval."""
         mock_entry = MockMediaEntry(
             title="The Matrix",
-            node_id="tm123",
+            entry_id="tm123",
             release_year=1999,
             runtime_minutes=136,
             genres=["Action", "Sci-Fi"],
-            imdb_score=8.7,
+            scoring=MockScoring(imdb_score=8.7),
         )
 
         with patch("mcp_justwatch.server.justwatch.details", return_value=mock_entry):
@@ -281,8 +339,11 @@ class TestGetOffersForCountries:
     def test_get_offers_success(self):
         """Test successful offers retrieval across countries."""
         mock_offers = {
-            "US": [MockOffer(name="Netflix"), MockOffer(name="Hulu")],
-            "GB": [MockOffer(name="Netflix")],
+            "US": [
+                MockOffer(package=MockOfferPackage(name="Netflix")),
+                MockOffer(package=MockOfferPackage(name="Hulu"))
+            ],
+            "GB": [MockOffer(package=MockOfferPackage(name="Netflix"))],
         }
 
         with patch(
@@ -305,7 +366,7 @@ class TestGetOffersForCountries:
     def test_get_offers_empty_country(self):
         """Test offers with countries having no offers."""
         mock_offers = {
-            "US": [MockOffer(name="Netflix")],
+            "US": [MockOffer(package=MockOfferPackage(name="Netflix"))],
             "XX": [],
         }
 
@@ -354,9 +415,9 @@ class TestGetOffersForCountries:
         mock_offers = {
             "US": [
                 MockOffer(
-                    name="Amazon",
+                    package=MockOfferPackage(name="Amazon"),
                     monetization_type="RENT",
-                    presentation_type="4K",
+                    presentation_type="_4K",
                     price_string="$3.99",
                     url="https://amazon.com/example",
                 )
@@ -370,7 +431,7 @@ class TestGetOffersForCountries:
 
         assert "Amazon" in result
         assert "RENT" in result
-        assert "4K" in result
+        assert "4K" in result or "_4K" in result
         assert "$3.99" in result
         assert "https://amazon.com/example" in result
 

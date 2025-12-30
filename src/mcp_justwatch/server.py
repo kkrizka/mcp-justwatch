@@ -30,10 +30,9 @@ def format_media_entry(entry, index: Optional[int] = None) -> str:
         lines.append("\n")
 
     # Basic information
-    logger.debug(f"Formatting entry: {entry}")
     lines.append(f"Title: {entry.title}")
-    lines.append(f"  Node ID: {entry.node_id}")
-    lines.append(f"  Type: {entry.entry_type}")
+    lines.append(f"  Entry ID: {entry.entry_id}")
+    lines.append(f"  Type: {entry.object_type}")
 
     if entry.release_year:
         lines.append(f"  Release Year: {entry.release_year}")
@@ -55,19 +54,18 @@ def format_media_entry(entry, index: Optional[int] = None) -> str:
         genres_str = ", ".join(entry.genres)
         lines.append(f"  Genres: {genres_str}")
 
-    # IMDb score
-    if entry.imdb_score:
-        lines.append(f"  IMDb Score: {entry.imdb_score}/10")
-
-    # TMDb score
-    if entry.tmdb_score:
-        lines.append(f"  TMDb Score: {entry.tmdb_score}/10")
+    # Scores
+    if hasattr(entry, 'scoring') and entry.scoring:
+        if entry.scoring.imdb_score:
+            lines.append(f"  IMDb Score: {entry.scoring.imdb_score}/10")
+        if entry.scoring.tmdb_score:
+            lines.append(f"  TMDb Score: {entry.scoring.tmdb_score}/10")
 
     # Streaming offers
     if entry.offers:
         lines.append(f"  Available on {len(entry.offers)} platform(s):")
         for offer in entry.offers:
-            offer_line = f"    - {offer.name}"
+            offer_line = f"    - {offer.package.name}"
             details_parts = []
             if offer.monetization_type:
                 details_parts.append(offer.monetization_type)
@@ -227,7 +225,7 @@ def get_offers_for_countries(
             output_lines.append(f"\n{country}:")
             if offers_list:
                 for offer in offers_list:
-                    offer_line = f"  - {offer.name}"
+                    offer_line = f"  - {offer.package.name}"
                     details_parts = []
                     if offer.monetization_type:
                         details_parts.append(offer.monetization_type)
