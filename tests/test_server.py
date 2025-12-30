@@ -83,8 +83,7 @@ class MockMediaEntry:
         scoring = kwargs.get("scoring", None)
         if scoring is None and (kwargs.get("imdb_score") or kwargs.get("tmdb_score")):
             self.scoring = MockScoring(
-                imdb_score=kwargs.get("imdb_score"),
-                tmdb_score=kwargs.get("tmdb_score")
+                imdb_score=kwargs.get("imdb_score"), tmdb_score=kwargs.get("tmdb_score")
             )
         elif isinstance(scoring, dict):
             self.scoring = MockScoring(**scoring)
@@ -145,9 +144,7 @@ class TestFormatMediaEntry:
 
     def test_format_entry_with_scores(self):
         """Test formatting entry with IMDb and TMDb scores."""
-        entry = MockMediaEntry(
-            scoring=MockScoring(imdb_score=8.7, tmdb_score=8.5)
-        )
+        entry = MockMediaEntry(scoring=MockScoring(imdb_score=8.7, tmdb_score=8.5))
 
         result = format_media_entry(entry)
 
@@ -158,7 +155,11 @@ class TestFormatMediaEntry:
         """Test formatting entry with streaming offers."""
         offers = [
             MockOffer(package=MockOfferPackage(name="Netflix"), monetization_type="FLATRATE"),
-            MockOffer(package=MockOfferPackage(name="Amazon"), monetization_type="RENT", price_string="$3.99"),
+            MockOffer(
+                package=MockOfferPackage(name="Amazon"),
+                monetization_type="RENT",
+                price_string="$3.99",
+            ),
         ]
         entry = MockMediaEntry(offers=offers)
 
@@ -212,7 +213,9 @@ class TestSearchContent:
         """Test search with all optional parameters."""
         mock_entry = MockMediaEntry(title="Test Movie")
 
-        with patch("mcp_justwatch.server.justwatch.search", return_value=[mock_entry]) as mock_search:
+        with patch(
+            "mcp_justwatch.server.justwatch.search", return_value=[mock_entry]
+        ) as mock_search:
             result = search_content.fn(
                 query="Test",
                 country="GB",
@@ -230,7 +233,9 @@ class TestSearchContent:
         """Test that country codes are normalized to uppercase."""
         mock_entry = MockMediaEntry(title="Test")
 
-        with patch("mcp_justwatch.server.justwatch.search", return_value=[mock_entry]) as mock_search:
+        with patch(
+            "mcp_justwatch.server.justwatch.search", return_value=[mock_entry]
+        ) as mock_search:
             search_content.fn(query="Test", country="us")
 
         # Check that the country was uppercased
@@ -241,7 +246,9 @@ class TestSearchContent:
         """Test that language codes are normalized to lowercase."""
         mock_entry = MockMediaEntry(title="Test")
 
-        with patch("mcp_justwatch.server.justwatch.search", return_value=[mock_entry]) as mock_search:
+        with patch(
+            "mcp_justwatch.server.justwatch.search", return_value=[mock_entry]
+        ) as mock_search:
             search_content.fn(query="Test", language="EN")
 
         # Check that the language was lowercased
@@ -252,12 +259,16 @@ class TestSearchContent:
         """Test that count is clamped to valid range."""
         mock_entry = MockMediaEntry(title="Test")
 
-        with patch("mcp_justwatch.server.justwatch.search", return_value=[mock_entry]) as mock_search:
+        with patch(
+            "mcp_justwatch.server.justwatch.search", return_value=[mock_entry]
+        ) as mock_search:
             # Test upper bound
             search_content.fn(query="Test", count=100)
             assert mock_search.call_args.kwargs["count"] == 20
 
-        with patch("mcp_justwatch.server.justwatch.search", return_value=[mock_entry]) as mock_search:
+        with patch(
+            "mcp_justwatch.server.justwatch.search", return_value=[mock_entry]
+        ) as mock_search:
             # Test lower bound
             search_content.fn(query="Test", count=0)
             assert mock_search.call_args.kwargs["count"] == 1
@@ -303,10 +314,10 @@ class TestGetDetails:
         """Test details with all optional parameters."""
         mock_entry = MockMediaEntry(title="Test")
 
-        with patch("mcp_justwatch.server.justwatch.details", return_value=mock_entry) as mock_details:
-            result = get_details.fn(
-                node_id="tm123", country="FR", language="fr", best_only=False
-            )
+        with patch(
+            "mcp_justwatch.server.justwatch.details", return_value=mock_entry
+        ) as mock_details:
+            result = get_details.fn(node_id="tm123", country="FR", language="fr", best_only=False)
 
         mock_details.assert_called_once_with(
             node_id="tm123", country="FR", language="fr", best_only=False
@@ -317,7 +328,9 @@ class TestGetDetails:
         """Test that country and language codes are normalized."""
         mock_entry = MockMediaEntry(title="Test")
 
-        with patch("mcp_justwatch.server.justwatch.details", return_value=mock_entry) as mock_details:
+        with patch(
+            "mcp_justwatch.server.justwatch.details", return_value=mock_entry
+        ) as mock_details:
             get_details.fn(node_id="tm123", country="gb", language="EN")
 
         call_args = mock_details.call_args
@@ -341,14 +354,12 @@ class TestGetOffersForCountries:
         mock_offers = {
             "US": [
                 MockOffer(package=MockOfferPackage(name="Netflix")),
-                MockOffer(package=MockOfferPackage(name="Hulu"))
+                MockOffer(package=MockOfferPackage(name="Hulu")),
             ],
             "GB": [MockOffer(package=MockOfferPackage(name="Netflix"))],
         }
 
-        with patch(
-            "mcp_justwatch.server.justwatch.offers_for_countries", return_value=mock_offers
-        ):
+        with patch("mcp_justwatch.server.justwatch.offers_for_countries", return_value=mock_offers):
             result = get_offers_for_countries.fn(node_id="tm123", countries=["US", "GB"])
 
         assert "US:" in result
@@ -370,9 +381,7 @@ class TestGetOffersForCountries:
             "XX": [],
         }
 
-        with patch(
-            "mcp_justwatch.server.justwatch.offers_for_countries", return_value=mock_offers
-        ):
+        with patch("mcp_justwatch.server.justwatch.offers_for_countries", return_value=mock_offers):
             result = get_offers_for_countries.fn(node_id="tm123", countries=["US", "XX"])
 
         assert "US:" in result
@@ -424,9 +433,7 @@ class TestGetOffersForCountries:
             ]
         }
 
-        with patch(
-            "mcp_justwatch.server.justwatch.offers_for_countries", return_value=mock_offers
-        ):
+        with patch("mcp_justwatch.server.justwatch.offers_for_countries", return_value=mock_offers):
             result = get_offers_for_countries.fn(node_id="tm123", countries=["US"])
 
         assert "Amazon" in result

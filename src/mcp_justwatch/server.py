@@ -10,9 +10,9 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Configure file handler for this module's logger only
-file_handler = logging.FileHandler('output.log', mode='a')
+file_handler = logging.FileHandler("output.log", mode="a")
 file_handler.setLevel(logging.INFO)
-file_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+file_handler.setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s"))
 logger.addHandler(file_handler)
 
 # Initialize FastMCP server
@@ -55,7 +55,7 @@ def format_media_entry(entry, index: Optional[int] = None) -> str:
         lines.append(f"  Genres: {genres_str}")
 
     # Scores
-    if hasattr(entry, 'scoring') and entry.scoring:
+    if hasattr(entry, "scoring") and entry.scoring:
         if entry.scoring.imdb_score:
             lines.append(f"  IMDb Score: {entry.scoring.imdb_score}/10")
         if entry.scoring.tmdb_score:
@@ -115,11 +115,7 @@ def search_content(
         logger.info(f"Searching for '{query}' in {country} (language: {language})")
 
         results = justwatch.search(
-            title=query,
-            country=country,
-            language=language,
-            count=count,
-            best_only=best_only
+            title=query, country=country, language=language, count=count, best_only=best_only
         )
 
         if not results:
@@ -164,10 +160,7 @@ def get_details(
         logger.info(f"Getting details for node ID '{node_id}' in {country}")
 
         entry = justwatch.details(
-            node_id=node_id,
-            country=country,
-            language=language,
-            best_only=best_only
+            node_id=node_id, country=country, language=language, best_only=best_only
         )
 
         if not entry:
@@ -209,10 +202,7 @@ def get_offers_for_countries(
         logger.info(f"Getting offers for node ID '{node_id}' in countries: {countries_set}")
 
         offers_dict = justwatch.offers_for_countries(
-            node_id=node_id,
-            countries=countries_set,
-            language=language,
-            best_only=best_only
+            node_id=node_id, countries=countries_set, language=language, best_only=best_only
         )
 
         if not offers_dict:
