@@ -20,8 +20,12 @@ This server is built using:
 
 ### Prerequisites
 
-- Python 3.10 or higher
+- Python 3.11 or higher
 - pip or uv package manager
+
+### From Release
+
+Skip to "As an MCP Server" as a section to automatically download the package inside common MCP clients.
 
 ### From Source
 
@@ -34,11 +38,6 @@ cd mcp-justwatch
 2. Install the package:
 ```bash
 pip install -e .
-```
-
-Or using `uv`:
-```bash
-uv pip install -e .
 ```
 
 ### For Development
@@ -56,14 +55,14 @@ This server is designed to be used with MCP clients. Add it to your MCP client c
 
 #### Claude Desktop Configuration
 
-Add to your `claude_desktop_config.json`:
+Add to your `claude_desktop_config.json` to automatically download the package at the start of the session using `uvx`.
 
 ```json
 {
   "mcpServers": {
     "justwatch": {
-      "command": "python",
-      "args": ["-m", "mcp_justwatch.server"]
+      "command": "uvx",
+      "args": ["mcp-justwatch", "python", "-m", "mcp_justwatch.server"]
     }
   }
 }

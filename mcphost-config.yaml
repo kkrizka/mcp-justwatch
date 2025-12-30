@@ -2,9 +2,9 @@
 
 mcpServers:
   justwatch:
-    command: uv
+    command: uvx
     args:
-      - run
+      - mcp-justwatch
       - python
       - -m
       - mcp_justwatch.server
