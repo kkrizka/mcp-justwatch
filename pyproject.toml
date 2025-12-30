@@ -7,7 +7,7 @@ name = "mcp-justwatch"
 version = "0.0.1"
 description = "MCP server for JustWatch streaming availability data."
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 authors = [
     { name = "Karol Krizka", email = "kkrizka@gmail.com" }
 ]
@@ -32,11 +32,11 @@ packages = ["src/mcp_justwatch"]
 
 [tool.black]
 line-length = 100
-target-version = ["py310"]
+target-version = ["py311"]
 
 [tool.ruff]
 line-length = 100
-target-version = "py310"
+target-version = "py311"
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
