@@ -208,7 +208,7 @@ def get_offers_for_countries(
         if not offers_dict:
             return f"No offers found for node ID '{node_id}'."
 
-        output_lines = [f"Streaming offers across countries:\n"]
+        output_lines = ["Streaming offers across countries:\n"]
 
         for country in sorted(countries_set):
             offers_list = offers_dict.get(country, [])

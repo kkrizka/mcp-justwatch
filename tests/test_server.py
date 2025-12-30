@@ -1,7 +1,6 @@
 """Tests for the MCP JustWatch server using FastMCP."""
 
-import pytest
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 from mcp_justwatch.server import (
     search_content,
