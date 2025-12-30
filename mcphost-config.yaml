@@ -1,0 +1,10 @@
+# Example MCPHost Configuration for JustWatch Server
+
+mcpServers:
+  justwatch:
+    command: uv
+    args:
+      - run
+      - python
+      - -m
+      - mcp_justwatch.server
