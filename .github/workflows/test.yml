@@ -11,6 +11,8 @@ jobs:
     name: Check formatting with black
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/checkout@v4
+
     - uses: ./.github/actions/setup-python-env
       with:
         python-version: "3.11"
@@ -25,6 +27,8 @@ jobs:
     name: Lint with ruff
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/checkout@v4
+
     - uses: ./.github/actions/setup-python-env
       with:
         python-version: "3.11"
@@ -43,6 +47,8 @@ jobs:
         python-version: ["3.11", "3.12"]
 
     steps:
+    - uses: actions/checkout@v4
+
     - uses: ./.github/actions/setup-python-env
       with:
         python-version: ${{ matrix.python-version }}
